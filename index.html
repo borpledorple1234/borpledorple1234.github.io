@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Secure Access</title>
+<title>MKZ Archive Node</title>
 
 <style>
     body {
@@ -17,17 +17,28 @@
         overflow: hidden;
     }
 
-    /* DITHER / NOISE OVERLAY */
+    /* NOISE */
     body::before {
         content: "";
         position: absolute;
         width: 200%;
         height: 200%;
-        background-image: 
-            radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
         background-size: 3px 3px;
         animation: noiseMove 0.3s infinite;
         pointer-events: none;
+    }
+
+    /* HIDDEN ARG TEXT IN NOISE */
+    body::after {
+        content: "THREE SIGNALS • VIII II IV • 2006 • ROOTS /3 • 12/3 • 2→2";
+        position: absolute;
+        font-size: 10px;
+        color: rgba(255,255,255,0.05);
+        letter-spacing: 2px;
+        bottom: 10px;
+        left: 10px;
+        user-select: none;
     }
 
     @keyframes noiseMove {
@@ -47,8 +58,14 @@
     }
 
     h2 {
-        margin-bottom: 25px;
-        letter-spacing: 1px;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+    }
+
+    .sub {
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 20px;
     }
 
     .code-inputs {
@@ -99,13 +116,30 @@
         margin-top: 12px;
         display: none;
     }
+
+    /* SECRET HINT (hover to reveal) */
+    .hint {
+        position: absolute;
+        top: -18px;
+        right: 10px;
+        font-size: 10px;
+        color: rgba(255,255,255,0.15);
+        cursor: default;
+    }
+
+    .hint:hover {
+        color: rgba(255,255,255,0.6);
+    }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h2>Enter Access Code</h2>
+    <div class="hint" title="not everything is in order">⟡</div>
+
+    <h2>ARCHIVE LOCK</h2>
+    <div class="sub">Recovered fragments require reconstruction</div>
 
     <div class="code-inputs">
         <input maxlength="1" type="text">
@@ -116,8 +150,8 @@
         <input maxlength="1" type="text">
     </div>
 
-    <button onclick="checkCode()">Unlock</button>
-    <div class="error" id="errorMsg">Incorrect Code</div>
+    <button onclick="checkCode()">DECRYPT</button>
+    <div class="error" id="errorMsg">ACCESS DENIED</div>
 </div>
 
 <script>
@@ -142,14 +176,25 @@
         let code = "";
         inputs.forEach(input => code += input.value);
 
-        const correctCode = "384192"; // CHANGE THIS
-1
+        const correctCode = "384192";
+
         if (code === correctCode) {
-            window.location.href = "37/82/43/15/94/62/index.html"; // CHANGE DESTINATION
+            window.location.href = "37/82/43/15/94/62/index.html";
         } else {
             document.getElementById("errorMsg").style.display = "block";
         }
     }
+
+    // ARG BONUS: console clue
+    console.log("%cMKZ-ARCHIVE-06", "color: #b000ff; font-size: 16px;");
+    console.log("Fragments detected:");
+    console.log("A: echoes ≠ sources");
+    console.log("B: VIII II IV → reversed");
+    console.log("C: 2006 split");
+    console.log("D: 9 → 3");
+    console.log("E: 12 → 4");
+    console.log("F: 2 repeats");
+    console.log("Final note: reorder everything.");
 </script>
 
 </body>
