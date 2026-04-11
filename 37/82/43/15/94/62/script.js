@@ -24,6 +24,44 @@ function toTitleCase(str) {
     text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
   );
 }
+function getFavorites() {
+    return JSON.parse(localStorage.getItem("favorites") || "[]");
+}
+
+function saveFavorites(favs) {
+    localStorage.setItem("favorites", JSON.stringify(favs));
+}
+
+function toggleFavorite(id) {
+    let favs = getFavorites();
+
+    if (favs.includes(id)) {
+        favs = favs.filter(f => f !== id);
+    } else {
+        favs.push(id);
+    }
+
+    saveFavorites(favs);
+    sortZones(); // refresh UI
+}
+
+function isFavorite(id) {
+    return getFavorites().includes(id);
+}
+
+// 🕒 RECENTS
+function getRecent() {
+    return JSON.parse(localStorage.getItem("recent") || "[]");
+}
+
+function addRecent(id) {
+    let recent = getRecent();
+
+    recent.unshift(id);
+    recent = [...new Set(recent)].slice(0, 20);
+
+    localStorage.setItem("recent", JSON.stringify(recent));
+}
 async function listZones() {
     try {
       let sharesponse;
@@ -136,12 +174,23 @@ async function listZones() {
                 filteroption.removeChild(filteroption.lastElementChild);
             }
         }
-        for (const tag of alltags) {
-            const opt = document.createElement("option");
-            opt.value = tag;
-            opt.textContent = toTitleCase(tag);
-            filteroption.appendChild(opt);
-        }
+for (const tag of alltags) {
+    const opt = document.createElement("option");
+    opt.value = tag;
+    opt.textContent = toTitleCase(tag);
+    filteroption.appendChild(opt);
+}
+
+// ⭐ ADD THIS RIGHT HERE
+const favOpt = document.createElement("option");
+favOpt.value = "__FAVORITES__";
+favOpt.textContent = "⭐ Favorites";
+filteroption.appendChild(favOpt);
+
+const recentOpt = document.createElement("option");
+recentOpt.value = "__RECENT__";
+recentOpt.textContent = "🕒 Recently Played";
+filteroption.appendChild(recentOpt);
     } catch (error) {
         console.error(error);
         container.innerHTML = `Error loading zones: ${error}`;
@@ -219,6 +268,16 @@ function displayFeaturedZones(featuredZones) {
             event.stopPropagation();
             openZone(file);
         };
+        const favBtn = document.createElement("button");
+favBtn.textContent = isFavorite(file.id) ? "★" : "☆";
+favBtn.style.marginLeft = "5px";
+
+favBtn.onclick = (e) => {
+    e.stopPropagation();
+    toggleFavorite(file.id);
+};
+
+zoneItem.appendChild(favBtn);
         zoneItem.appendChild(button);
         featuredContainer.appendChild(zoneItem);
     });
@@ -265,6 +324,16 @@ function displayZones(zones) {
             event.stopPropagation();
             openZone(file);
         };
+        const favBtn = document.createElement("button");
+favBtn.textContent = isFavorite(file.id) ? "★" : "☆";
+favBtn.style.marginLeft = "5px";
+
+favBtn.onclick = (e) => {
+    e.stopPropagation();
+    toggleFavorite(file.id);
+};
+
+zoneItem.appendChild(favBtn);
         zoneItem.appendChild(button);
         container.appendChild(zoneItem);   
     });
@@ -296,18 +365,38 @@ function displayZones(zones) {
 
 function filterZones2() {
     const query = filterOptions.value;
+
     if (query === "none") {
         displayZones(zones);
-    } else {
-        const filteredZones = zones.filter(zone => zone.special?.includes(query));
-        if (query.length !== 0) {
-            document.getElementById("featuredZonesWrapper").removeAttribute("open");
-        }
-        displayZones(filteredZones);
+        return;
     }
+
+    if (query === "__FAVORITES__") {
+        const favs = getFavorites();
+        const filtered = zones.filter(z => favs.includes(z.id));
+        displayZones(filtered);
+        return;
+    }
+
+    if (query === "__RECENT__") {
+        const recent = getRecent();
+        const ordered = recent
+            .map(id => zones.find(z => z.id === id))
+            .filter(Boolean);
+
+        displayZones(ordered);
+        return;
+    }
+
+    const filteredZones = zones.filter(zone =>
+        zone.special?.includes(query)
+    );
+
+    displayZones(filteredZones);
 }
 
 function filterZones() {
+    
     const query = searchBar.value.toLowerCase();
     const filteredZones = zones.filter(zone => zone.name.toLowerCase().includes(query));
     if (query.length !== 0) {
@@ -317,6 +406,9 @@ function filterZones() {
 }
 
 function openZone(file) {
+    if (typeof file.id === "number" && file.id >= 0) {
+    addRecent(file.id);
+}
     // 🎲 Handle random zone
 if (file.url === "__RANDOM__") {
     const validZones = zones.filter(z => z.url !== "__RANDOM__");
